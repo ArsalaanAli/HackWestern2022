@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import cohere
 from cohere.classify import Example
 import requests
+from flask import *
+import json
 
 # This stock...
 CATEGORIES = ["should be avoided", "will likely lead to a loss",
@@ -120,3 +122,34 @@ for i in range(len(descriptions)):
 # Tough Crowd
 # Litmus Test
 # Temperature
+
+app = Flask(__name__)
+
+@app.route('/getSentiment', methods=['GET'])
+def getInfo():
+    data = json.loads(request.data)
+
+    jason={
+        'Bullet_Points': [],
+        'links': []
+    }
+    name = data['Stock_Name']
+    HeadlinesAndUrls = ParseForHeadlines(name)
+    titles = [i[0] for i in HeadlinesAndUrls]
+    results = ClassifyHeadlines(titles)
+    sentiment = GetSentiment(titles, results)
+    print(CATEGORIES[int((sentiment+1)/2*len(CATEGORIES))])
+    descriptions = GenerateDescription(titles, results)
+    response = ClassifyHeadlines(descriptions)
+    for i in range(len(descriptions)):
+        if response.classifications[i].confidence > 0.8 and descriptions[i] != "NULL":
+            jason['Bullet_Points'].append(descriptions[i])
+            jason['links'].append(HeadlinesAndUrls[i][1])
+
+    jason['ovr_rating'] = int((sentiment+1)/2*len(CATEGORIES))
+
+    print(jason)
+
+    return jason
+
+
