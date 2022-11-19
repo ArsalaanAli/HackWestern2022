@@ -4,29 +4,14 @@ from cohere.classify import Example
 import requests
 from flask import *
 import json
+import goodExamples
+import badExamples
 
 # This stock...
 CATEGORIES = ["should be avoided", "will likely lead to a loss",
               "is neutral", "will likely lead to gains", "is an excellent investment opportunity"]
 
-examples = [
-    Example("It will die.", "negative"),
-    Example("Will stand the test of time.", "positive"),
-    Example("Risks are high.", "negative"),
-    Example("First black manager hired.", "positive"),
-    Example("Why is it so bad?", "negative"),
-    Example("Will be updated to be better.", "positive"),
-    Example("There is no way that it can fail, surely.", "negative"),
-    Example("Not as bad as you think.", "positive"),
-    Example("Desperate measures being taken", "negative"),
-    Example("Expands to new horizons", "positive"),
-    Example("Sentenced to 11 years in prison.", "negative"),
-    Example("Found innocent and aqcuitted", "positive"),
-    Example("An update is overdue.", "negative"),
-    Example("Fully supported with excellent customer service", "positive"),
-    Example("Obsolete and outdated.", "negative"),
-    Example("State-of-the-art.", "positive"),
-]
+examples = goodExamples.goodExamples+badExamples.badExamples
 
 
 def ParseForHeadlines(url):
@@ -57,10 +42,10 @@ def GetSentiment(inputs, response):
     sentiment = 0
     for i in range(len(inputs)):
 
-        print()
-        print(inputs[i])
-        print(response.classifications[i])
-        print()
+        # print()
+        # print(inputs[i])
+        # print(response.classifications[i])
+        # print()
 
         if response.classifications[i].prediction == "negative":
             sentiment -= response.classifications[i].confidence
@@ -104,19 +89,19 @@ TLDR: Much-anticipated product offerings are slated for release.
     return collector
 
 
-name = "target bad"
-HeadlinesAndUrls = ParseForHeadlines(name)
-titles = [i[0] for i in HeadlinesAndUrls]
-results = ClassifyHeadlines(titles)
-sentiment = GetSentiment(titles, results)
-print(CATEGORIES[int((sentiment+1)/2*len(CATEGORIES))])
-descriptions = GenerateDescription(titles, results)
-response = ClassifyHeadlines(descriptions)
-for i in range(len(descriptions)):
-    if response.classifications[i].confidence > 0.8 and descriptions[i] != "NULL":
-        print(descriptions[i])
-        print(HeadlinesAndUrls[i][1])
-        print()
+# name = "target bad"
+# HeadlinesAndUrls = ParseForHeadlines(name)
+# titles = [i[0] for i in HeadlinesAndUrls]
+# results = ClassifyHeadlines(titles)
+# sentiment = GetSentiment(titles, results)
+# print(CATEGORIES[int((sentiment+1)/2*len(CATEGORIES))])
+# descriptions = GenerateDescription(titles, results)
+# response = ClassifyHeadlines(descriptions)
+# for i in range(len(descriptions)):
+#     if response.classifications[i].confidence > 0.8 and descriptions[i] != "NULL":
+#         print(descriptions[i])
+#         print(HeadlinesAndUrls[i][1])
+#         print()
 
 # Read the Room
 # Tough Crowd
@@ -125,11 +110,12 @@ for i in range(len(descriptions)):
 
 app = Flask(__name__)
 
+
 @app.route('/getSentiment', methods=['GET'])
 def getInfo():
     data = json.loads(request.data)
 
-    jason={
+    jason = {
         'Bullet_Points': [],
         'links': []
     }
@@ -151,5 +137,3 @@ def getInfo():
     print(jason)
 
     return jason
-
-
