@@ -6,6 +6,7 @@ from flask import *
 import json
 import goodExamples
 import badExamples
+import templateHeadlines
 
 # This stock...
 CATEGORIES = ["should be avoided", "will likely lead to a loss",
@@ -58,17 +59,7 @@ def GetSentiment(inputs, response):
 def GenerateDescription(inputs, responses):
     co = cohere.Client('yo3sGBCHSmIUSH3bQJNjzjYobJVka265uNZQ5Q8p')
     # "This stock "+CATEGORIES[int(len(CATEGORIES)*sentiment)]
-    TEMPLATE = """Generates a summary of the stock evaluation.
-Passage: A new venue has been opened.
-TLDR: A new venue has been opened.
--
-Passage: Black Friday deals you can get.
-TLDR: Profits are expected to rise from Black Friday sales.
--
-Passage: A new release has been announced.
-TLDR: Much-anticipated product offerings are slated for release.
--
-"""
+    TEMPLATE = templateHeadlines.TEMPLATE
     collector = []
     for i in range(len(inputs)):
         if responses.classifications[i].confidence > 0.7:
