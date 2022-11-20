@@ -73,7 +73,7 @@ def GenerateDescription(inputs, responses):
                 max_tokens=40,
                 temperature=0.3,
                 frequency_penalty=0.5,
-                stop_sequences=[".", ","])
+                stop_sequences=["--"])
             stock_description = response.generations[0].text
             collector.append(stock_description)
         else:

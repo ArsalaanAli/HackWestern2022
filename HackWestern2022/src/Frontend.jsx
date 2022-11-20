@@ -2,6 +2,7 @@ import "./Frontend.css";
 import { useEffect } from "react";
 import StockData from "../AllStocks.json";
 import TopStocks from "../TopStocks.json";
+import Stalker from "./stalker.png";
 
 import {
   Collapse,
@@ -15,6 +16,9 @@ import {
   OutlinedInput,
   styled,
   TextField,
+  CircularProgress,
+  Modal,
+  Backdrop,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -29,6 +33,17 @@ function Frontend() {
   const [curStocks, setCurStocks] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [stockInfo, setStockInfo] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const review = [
+    "This stock is likely a very bad choice",
+    "This stock might be a bad choice",
+    "This stock is neutral",
+    "This stock might be a good choice",
+    "This stock is an excellent choice",
+  ];
+  const reviewColors = ["bad", "slightBad", "neutral", "slightGood", "good"];
+
+  console.log(isLoading);
 
   useEffect(() => {
     const fetchData = async (stockName) => {
@@ -47,20 +62,30 @@ function Frontend() {
       console.log(data);
       return data;
     };
+
     curStocks.forEach(async (stock) => {
       const data = await fetchData(stock);
       console.log(data);
       stockInfo[stock] = data;
       setStockInfo(stockInfo);
+      setIsLoading(false);
     });
   }, [curStocks]);
 
   const searchStocks = () => {
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
     const tempStocks = Object.keys(StockData).filter((stock) => {
       return stock
         .toLocaleLowerCase()
         .includes(searchInput.toLocaleLowerCase());
     });
+    if (tempStocks.length === 0) {
+      setIsLoading(false);
+      return;
+    }
     setCurStocks(tempStocks.slice(0, MAX_STOCKS));
   };
 
@@ -78,19 +103,18 @@ function Frontend() {
     };
     const looper = [0, 1, 2];
     if (stockSentiment == undefined) {
-      console.log("not drop");
       return (
-        <div>
-          <ListItemButton onClick={handleClick}>
-            <ListItemText
-              primary={props.stockName + " | " + props.stockShortName}
-            />
-          </ListItemButton>
-        </div>
+        <>
+          <div>
+            <ListItemButton onClick={handleClick}>
+              <ListItemText
+                primary={props.stockName + " | " + props.stockShortName}
+              />
+            </ListItemButton>
+          </div>
+        </>
       );
     } else {
-      console.log("drop");
-
       return (
         <div>
           <ListItemButton onClick={handleClick}>
@@ -100,12 +124,20 @@ function Frontend() {
           </ListItemButton>
           <Collapse in={open} timeout="auto" unmountOnExit>
             {/* <blockquote>{props.summary}</blockquote> */}
+            <div
+              className={"review " + reviewColors[stockSentiment["ovr_rating"]]}
+            >
+              {review[stockSentiment["ovr_rating"]]}
+            </div>
             <ul>
               {looper.map(function (index, index2) {
                 return (
                   <li key={index2}>
-                    <a href={stockSentiment.links[index]}>
-                      {stockSentiment.Bullet_Points[index]}
+                    <a
+                      className="bulletPoint"
+                      href={stockSentiment.links[index]}
+                    >
+                      {stockSentiment.Bullet_Points[index]}...
                     </a>
                   </li>
                 );
@@ -124,6 +156,7 @@ function Frontend() {
   return (
     <div className="App">
       <header className="App-header">
+        <img src={Stalker} className="logoPicture" />
         <h1>Stocker</h1>
         <div className={"SearchBar"}>
           <p className={"FieldLabel"}>Input stock name:</p>
@@ -134,8 +167,20 @@ function Frontend() {
             variant="outlined"
             onChange={handleChange}
           />
-          <button onClick={searchStocks}>SEARCH</button>
         </div>
+        <button onClick={searchStocks} className="searchButton">
+          SEARCH
+        </button>
+        {isLoading ? (
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={true}
+            onClick={() => {}}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        ) : null}{" "}
+        {/* Loading modal */}
         <List className={"ItemsList"} sx={style} component="nav">
           {/*name of stock, short name of stock, rating(0-4*/}{" "}
           <div className="cardsHolder">
