@@ -37,15 +37,6 @@ function App() {
     setSearchInput(e.target.value);
   };
 
-  const searchStocks = () => {
-    const tempStocks = Object.keys(StockData).filter((stock) => {
-      return stock
-        .toLocaleLowerCase()
-        .includes(searchInput.toLocaleLowerCase());
-    });
-    setCurStocks(tempStocks.slice(0, MAX_STOCKS));
-  };
-
   const SentimentGraphic = (props) => {
     return (
       <div className="sentimentContainer">
