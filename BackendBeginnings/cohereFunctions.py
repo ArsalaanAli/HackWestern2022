@@ -25,7 +25,6 @@ def ParseForHeadlines(url):
     inputs = [i.find("div").text for i in headings]
     hyperlinks = hyperlinks[-6-len(inputs):-6]
     HeadlinesAndUrls = [(inputs[i], hyperlinks[i]) for i in range(len(inputs))]
-    # print(HeadlinesAndUrls[5][1][7:])
     return HeadlinesAndUrls
 
 
@@ -115,16 +114,18 @@ def getInfo():
     titles = [i[0] for i in HeadlinesAndUrls]
     results = ClassifyHeadlines(titles)
     sentiment = GetSentiment(titles, results)
-    print(CATEGORIES[int((sentiment+1)/2*len(CATEGORIES))])
     descriptions = GenerateDescription(titles, results)
     response = ClassifyHeadlines(descriptions)
+
+
+    points_inserted = 0
+
     for i in range(len(descriptions)):
-        if response.classifications[i].confidence > 0.8 and descriptions[i] != "NULL":
+        if response.classifications[i].confidence > 0.8 and descriptions[i] != "NULL" and points_inserted < 3:
             jason['Bullet_Points'].append(descriptions[i])
-            jason['links'].append(HeadlinesAndUrls[i][1])
+            jason['links'].append(HeadlinesAndUrls[i][1][7:])
+            points_inserted += 1
 
     jason['ovr_rating'] = int((sentiment+1)/2*len(CATEGORIES))
-
-    print(jason)
 
     return jason
