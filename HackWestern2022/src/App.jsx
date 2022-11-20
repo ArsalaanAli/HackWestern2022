@@ -12,14 +12,12 @@ function App() {
 
   useEffect(() => {
     const fetchData = async (stockName) => {
-      console.log("fetching");
-      const data = await fetch(
-        "https://94aac77b-2c55-492f-bca2-8fb32d5ff3c3.mock.pstmn.io/getSentiment3.0",
-        {
-          method: "GET",
-          props: {},
-        }
-      );
+      const endPoint = "http://127.0.0.1:5000/getSentiment";
+      console.log("fetching HELLO?" + endPoint);
+      const data = await fetch(endPoint, {
+        method: "GET",
+        props: { Stock_Name: stockName },
+      });
 
       const parsedData = JSON.parse(await data.text());
       console.log(parsedData);

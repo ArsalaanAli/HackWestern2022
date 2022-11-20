@@ -33,19 +33,23 @@ function Frontend() {
   useEffect(() => {
     const fetchData = async (stockName) => {
       console.log("fetching");
-      const data = await fetch(
-        "https://94aac77b-2c55-492f-bca2-8fb32d5ff3c3.mock.pstmn.io/getSentiment3.0",
-        {
-          method: "GET",
-          props: {},
-        }
-      );
+      const data = fetch("http://localhost:5000/getSentiment", {
+        method: "POST",
+        body: JSON.stringify({ Stock_Name: stockName }),
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((response) => {
+          return response;
+        });
 
-      const parsedData = await JSON.parse(await data.text());
-      return parsedData;
+      console.log(data);
+      return data;
     };
     curStocks.forEach(async (stock) => {
       const data = await fetchData(stock);
+      console.log(data);
       stockInfo[stock] = data;
       setStockInfo(stockInfo);
     });
@@ -68,6 +72,7 @@ function Frontend() {
   const Card = (props) => {
     const [open, setOpen] = useState(false);
     const stockSentiment = stockInfo[props.stockName];
+    console.log(stockSentiment + "sentimentsPassed Though");
     const handleClick = () => {
       setOpen(!open);
     };

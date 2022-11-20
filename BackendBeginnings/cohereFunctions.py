@@ -7,6 +7,8 @@ import json
 import goodExamples
 import badExamples
 import templateHeadlines
+from flask_cors import CORS, cross_origin
+
 
 # This stock...
 CATEGORIES = ["should be avoided", "will likely lead to a loss",
@@ -99,9 +101,11 @@ def GenerateDescription(inputs, responses):
 # Temperature
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-
-@app.route('/getSentiment', methods=['GET'])
+@app.route('/getSentiment', methods=['POST'])
+@cross_origin()
 def getInfo():
     data = json.loads(request.data)
 
@@ -127,5 +131,4 @@ def getInfo():
             points_inserted += 1
 
     jason['ovr_rating'] = int((sentiment+1)/2*len(CATEGORIES))
-
     return jason
